@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+//since planetscale db do not support of foreign key and referential
+//integrity we are using prisma client emulation of this integrity
+//it has some performance implications
+//https://docs.planetscale.com/tutorials/operating-without-foreign-keys
+//https://www.prisma.io/docs/concepts/components/preview-features
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  shadowDatabaseUrl    = env("SHADOW_DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id           String    @id
+  name         String?
+  email        String?   @unique
+  image        String?
+  projects     Project[]
+  noOfProjects Int       @default(0) @map("no_of_projects")
+}
+
+model Todo {
+  id           String    @id @default(cuid())
+  name         String
+  description  String?   @db.VarChar(1000)
+  noOfComments Int       @default(0) @map("no_of_comments")
+  comments     Comment[]
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  dueDate      DateTime? @map("due_date")
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  projectId    String    @map("project_id")
+  priority     Priority  @default(P4)
+}
+
+model Project {
+  id        String  @id @default(cuid())
+  name      String
+  isFav     Boolean @default(false) @map("is_fav")
+  noOfTodos Int     @default(0) @map("no_of_todos")
+  Todo      Todo[]
+  User      User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId    String
+  isIndex   Boolean @default(false) @map("is_index")
+}
+
+model Comment {
+  id     String @id @default(cuid())
+  text   String @db.VarChar(1000)
+  todo   Todo   @relation(fields: [todoId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  todoId String @map("todo_id")
+}
+
+enum Priority {
+  P1
+  P2
+  P3
+  P4
+}
