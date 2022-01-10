@@ -4,8 +4,6 @@ import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0";
 import { prisma } from "../../../../../lib/prisma";
 
 export default withApiAuthRequired(async function handler(req, res) {
-  const session = getSession(req, res);
-  const userId = session!.user.sub as string;
   let { projectId } = req.query;
   projectId = typeof projectId === "object" ? projectId[0] : projectId;
 

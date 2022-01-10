@@ -1,6 +1,20 @@
+import { useUser } from "@auth0/nextjs-auth0";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
+
 const Home: NextPage = () => {
+  const { user, error, isLoading } = useUser();
+  const router = useRouter();
+
+  if (user) router.replace("/app");
+  if (isLoading)
+    return (
+      <div className="h-screen flex justify-center items-center">
+        Loading...
+      </div>
+    );
+
   return (
     <div className="">
       <Head>
@@ -13,8 +27,6 @@ const Home: NextPage = () => {
         <h1>landing page</h1>
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/api/auth/login">Login</a>
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-        <a href="/api/auth/logout">Logout</a>
       </main>
     </div>
   );

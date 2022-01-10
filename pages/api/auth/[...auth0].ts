@@ -10,7 +10,7 @@ const afterCallback = async (
 ) => {
   console.log("session at aftercallback", session);
   try {
-    //create user
+    //create user if does not exist
     //session.user.sub is the user_id
     const user = await prisma.user.findUnique({
       where: {
@@ -19,12 +19,20 @@ const afterCallback = async (
     });
     console.log("user at aftercallback", user);
     if (!user) {
-      const user = await prisma.user.create({
+      await prisma.user.create({
         data: {
           id: session.user.sub,
           name: session.user.nickname,
           //weirdly auth0 return email as name(username is not required for signup)
           email: session.user.name,
+        },
+      });
+      // create default project index
+      await prisma.project.create({
+        data: {
+          name: req.body.name,
+          userId: user!.id,
+          isIndex: true,
         },
       });
     }

@@ -1,7 +1,7 @@
 import { useUser, UserProfile } from "@auth0/nextjs-auth0";
 import Image from "next/image";
 import { useEffect } from "react";
-import { placeholderPersonImg } from "../placeholderImgs";
+import { placeholderPersonImg } from "../../placeholderImgs";
 
 export default function Profile() {
   const { user, error, isLoading } = useUser();

@@ -2,7 +2,7 @@
 module.exports = {
   reactStrictMode: true,
   images: {
-    domains: ['s.gravatar.com'],
+    domains: ['s.gravatar.com', 'i.imgur.com'],
   },
 }
 

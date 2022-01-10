@@ -3,7 +3,7 @@
 import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0";
 import { Prisma } from "@prisma/client";
 import { NextApiResponse } from "next";
-import { prisma } from "../../../../../lib/prisma";
+import { prisma } from "../../../../../../lib/prisma";
 
 function handleError(error: unknown, res: NextApiResponse) {
   if (error instanceof Error)
@@ -14,8 +14,6 @@ function handleError(error: unknown, res: NextApiResponse) {
 }
 
 export default withApiAuthRequired(async function handler(req, res) {
-  const session = getSession(req, res);
-  const userId = session!.user.sub as string;
   let { projectId, todoId } = req.query;
   projectId = typeof projectId === "object" ? projectId[0] : projectId;
   todoId = typeof todoId === "object" ? todoId[0] : todoId;

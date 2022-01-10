@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .icon {
+    @apply h-6 w-6 cursor-pointer text-white;
+  }
+}
+
 html,
 body {
   padding: 0;
