@@ -32,6 +32,7 @@ export default withApiAuthRequired(async function handler(
     }
   } else if (req.method === "POST") {
     try {
+      console.log("req.body at create project", req.body);
       const project = await prisma.project.create({
         data: {
           name: req.body.name,
@@ -42,6 +43,7 @@ export default withApiAuthRequired(async function handler(
       });
       res.status(201).json({ data: project });
     } catch (error) {
+      console.log("error at create project", error);
       res.status(500).json({ status: 500, error: "server problem" });
     }
   }

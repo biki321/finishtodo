@@ -1,6 +1,5 @@
 import { useUser } from "@auth0/nextjs-auth0";
 import { useState } from "react";
-import useWindowSize from "../hooks/useWindowSize";
 import AvatarDropDown from "./AvatarDropDown";
 import Drawer from "./Drawer";
 import {
@@ -13,9 +12,7 @@ import {
 
 function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
   //user will exist because this page won't render without an authenticated user
-  const { user } = useUser();
   const [drawerOpen, setDrawerOpen] = useState(false);
-
   const handleDrawer = () => setDrawerOpen((prevState) => !prevState);
 
   return (
@@ -44,7 +41,7 @@ function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
         >
           <Drawer handleDrawer={handleDrawer} />
         </div>
-        <div className={`${!drawerOpen ? "md:ml-[280px]" : "md:ml-0"}`}>
+        <div className={`${!drawerOpen ? "md:ml-[320px]" : "md:ml-0"}`}>
           {children}
         </div>
       </div>

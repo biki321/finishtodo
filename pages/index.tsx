@@ -6,14 +6,13 @@ import { useRouter } from "next/router";
 const Home: NextPage = () => {
   const { user, error, isLoading } = useUser();
   const router = useRouter();
-
-  if (user) router.replace("/app");
   if (isLoading)
     return (
       <div className="h-screen flex justify-center items-center">
         Loading...
       </div>
     );
+  if (user) router.replace("/today");
 
   return (
     <div className="">
