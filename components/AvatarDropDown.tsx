@@ -29,15 +29,17 @@ export default function AvatarDropDown() {
           </div>
         </DropdownMenu.Item>
         <hr className="text-gray-300" />
-        <DropdownMenu.Item className="cursor-pointer">
-          <div className="flex items-center text-[12.96px]">
-            <div className="mr-5">
-              <LogoutIcon />
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a href="/api/auth/logout">
+          <DropdownMenu.Item className="cursor-pointer">
+            <div className="flex items-center text-[12.96px]">
+              <div className="mr-5">
+                <LogoutIcon />
+              </div>
+              <span>Logout</span>
             </div>
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a href="/api/auth/logout">Logout</a>
-          </div>
-        </DropdownMenu.Item>
+          </DropdownMenu.Item>
+        </a>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );

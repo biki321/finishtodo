@@ -1,5 +1,6 @@
-import { useUser } from "@auth0/nextjs-auth0";
+import { Project } from "@prisma/client";
 import { useState } from "react";
+import useSWR from "swr";
 import AvatarDropDown from "./AvatarDropDown";
 import Drawer from "./Drawer";
 import {
@@ -10,10 +11,41 @@ import {
   PlusIcon,
 } from "./Icons";
 
+type JSONResponse = {
+  data?: Project[];
+  error?: string;
+};
+
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+
+  // If the status code is not in the range 200-299,
+  // we still try to parse and throw it.
+  if (!res.ok) {
+    console.log("res not ok");
+    const errorObj = new Error() as Error & { status: number };
+    const error = await res.json();
+    errorObj.message = error.error;
+    errorObj.status = error.status;
+    throw errorObj;
+  }
+  return res.json();
+};
+
 function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
   //user will exist because this page won't render without an authenticated user
   const [drawerOpen, setDrawerOpen] = useState(false);
   const handleDrawer = () => setDrawerOpen((prevState) => !prevState);
+  const { data: projectLists, error } = useSWR<
+    { data: Project[] },
+    Error & { status: number }
+  >("/api/projects", fetcher);
+
+  if (error) {
+    console.log(error);
+    return <div>failed to load</div>;
+  }
+  if (!projectLists) return <div>loading...</div>;
 
   return (
     <>
@@ -39,7 +71,10 @@ function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
             : "translate-x-0"
         }  ease-in-out duration-150`}
         >
-          <Drawer handleDrawer={handleDrawer} />
+          <Drawer
+            handleDrawer={handleDrawer}
+            projectLists={projectLists.data}
+          />
         </div>
         <div className={`${!drawerOpen ? "md:ml-[320px]" : "md:ml-0"}`}>
           {children}

@@ -19,7 +19,7 @@ const afterCallback = async (
     });
     console.log("user at aftercallback", user);
     if (!user) {
-      await prisma.user.create({
+      const createdUser = await prisma.user.create({
         data: {
           id: session.user.sub,
           name: session.user.nickname,
@@ -28,13 +28,15 @@ const afterCallback = async (
         },
       });
       // create default project index
-      await prisma.project.create({
+      const project = await prisma.project.create({
         data: {
-          name: req.body.name,
-          userId: user!.id,
+          name: "Inbox",
+          // User: { connect: { id: createdUser.id } },
+          userId: createdUser.id,
           isIndex: true,
         },
       });
+      console.log("indx proj", project);
     }
   } catch (error) {
     console.error(error);

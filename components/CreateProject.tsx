@@ -26,11 +26,7 @@ const validate = (values: FormValues) => {
   return errors;
 };
 
-// name: req.body.name,
-// isFav: req.body.isFav,
-// userId: userId,
-// isIndex: req.body.isIndex,
-
+// server side errors upon submission have not been handled yet
 function CreateProject({ children }: { children: JSX.Element }) {
   const { user } = useUser();
   const formik = useFormik<FormValues>({

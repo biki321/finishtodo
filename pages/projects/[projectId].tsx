@@ -14,7 +14,7 @@ const Project: NextPage = () => {
     return <div></div>;
   }
 
-  return <div></div>;
+  return <div>{projectId}</div>;
 };
 
 export default Project;
