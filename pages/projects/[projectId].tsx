@@ -45,7 +45,7 @@ const Project: NextPageWithLayout = () => {
       {todos?.data.map((todo) => (
         <Todo key={todo.id} todo={todo} />
       ))}
-      <AddTodo>
+      <AddTodo isDialog={false} todo={undefined}>
         <div className="text-xs text-gray-500 flex cursor-pointer">
           <PlusIcon className="w-4 h-4 text-emerald-700 mr-2" />
           Add task

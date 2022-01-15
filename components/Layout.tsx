@@ -1,8 +1,7 @@
-import { Project } from "@prisma/client";
 import { useState } from "react";
-import useSWR from "swr";
 import useProjectLists from "../hooks/useProjectLists";
 import AddTodo from "./AddTodo";
+import AddTodoDialog from "./AddTodo";
 import AvatarDropDown from "./AvatarDropDown";
 import Drawer from "./Drawer";
 import {
@@ -34,7 +33,7 @@ function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
           <HomeIcon />
         </div>
         <div className="flex space-x-3">
-          <AddTodo>
+          <AddTodo isDialog={true} todo={undefined}>
             <PlusIcon />
           </AddTodo>
           <CheckCircleIcon />

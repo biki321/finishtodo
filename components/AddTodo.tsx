@@ -12,7 +12,7 @@ import * as HoverCard from "@radix-ui/react-hover-card";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Priority } from "@prisma/client";
+import { Priority, Todo } from "@prisma/client";
 import AutoTextArea from "./AutoTextArea";
 import flagColors from "../helpers/flagColors";
 
@@ -44,7 +44,15 @@ const validate = (values: FormValues) => {
 };
 
 // server side errors upon submission have not been handled yet
-function AddTodo({ children }: { children: JSX.Element }) {
+function AddTodo({
+  children,
+  isDialog,
+  todo: Todo,
+}: {
+  children: JSX.Element;
+  isDialog: boolean;
+  todo: Todo | undefined;
+}) {
   const { user } = useUser();
   const router = useRouter();
   const { projectLists, error } = useProjectLists();
@@ -55,6 +63,7 @@ function AddTodo({ children }: { children: JSX.Element }) {
     id: undefined,
     name: undefined,
   });
+  const [openForm, setOpenForm] = useState(false);
   const asPath = router.asPath.split("/");
   // const day = days[new Date().getDay()];
   // const tomorrow = days[(new Date().getDay() + 1) % 7];
@@ -220,117 +229,141 @@ function AddTodo({ children }: { children: JSX.Element }) {
     );
   };
 
-  return (
-    <Dialog.Root>
-      <Dialog.Trigger>{children}</Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed  inset-0" />
-        <Dialog.Content
-          // Don't close the Alert Dialog when pressing ESC
-          onEscapeKeyDown={(event) => event.preventDefault()}
-          // Don't close the Alert Dialog when clicking outside
-          onPointerDownOutside={(event) => event.preventDefault()}
-          className="bg-white rounded-md shadow-2xl fixed p-4
-        top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm"
-        >
-          <form onSubmit={formik.handleSubmit}>
-            {formik.touched.todo && formik.errors.todo ? (
-              <p className="text-xs text-red-500">{formik.errors.todo}</p>
-            ) : null}
+  const FormTodo = (
+    <form onSubmit={formik.handleSubmit}>
+      {formik.touched.todo && formik.errors.todo ? (
+        <p className="text-xs text-red-500">{formik.errors.todo}</p>
+      ) : null}
 
-            <AutoTextArea
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              name="todo"
-              id="todo"
-              text={formik.values.todo}
-              placeholder="eg., Write the letter"
-              classNames="outline-none resize-none w-full text-sm font-semibold
-               text-gray-800"
-            />
+      <AutoTextArea
+        onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
+        name="todo"
+        id="todo"
+        text={formik.values.todo}
+        placeholder="eg., Write the letter"
+        classNames="outline-none resize-none w-full text-sm font-semibold
+     text-gray-800"
+      />
 
-            {formik.touched.description && formik.errors.description ? (
-              <p className="text-xs text-red-500">
-                {formik.errors.description}
-              </p>
-            ) : null}
+      {formik.touched.description && formik.errors.description ? (
+        <p className="text-xs text-red-500">{formik.errors.description}</p>
+      ) : null}
 
-            <AutoTextArea
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              name="description"
-              id="description"
-              text={formik.values.description}
-              placeholder="description"
-              classNames="outline-none resize-none w-full text-sm
-               text-gray-800"
-            />
+      <AutoTextArea
+        onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
+        name="description"
+        id="description"
+        text={formik.values.description}
+        placeholder="description"
+        classNames="outline-none resize-none w-full text-sm
+     text-gray-800"
+      />
+      <div
+        className="flex mb-5 items-center overflow-x-hidden flex-wrap
+   space-y-1"
+      >
+        <div className="mr-1">
+          <CustomDatePicker />
+        </div>
+        <div className="mr-auto">
+          <ProjectsDropDown>
             <div
-              className="flex mb-5 items-center overflow-x-hidden flex-wrap
-             space-y-1"
+              className="border-[1px] border-gray-500 px-2 py-1 text-gray-800
+        text-xs rounded-md flex items-center justify-center
+         hover:bg-gray-200 mr-2 truncate"
             >
-              <div className="mr-1">
-                <CustomDatePicker />
-              </div>
-              <div className="mr-auto">
-                <ProjectsDropDown>
-                  <div
-                    className="border-[1px] border-gray-500 px-2 py-1 text-gray-800
-                  text-xs rounded-md flex items-center justify-center
-                   hover:bg-gray-200 mr-2 truncate"
-                  >
-                    {projectForTodo.name === "Inbox" ? (
-                      <InboxIcon className="text-blue-500 h-4 w-4 mr-1" />
-                    ) : null}
-                    {projectForTodo.name ?? "Inbox"}
-                  </div>
-                </ProjectsDropDown>
-              </div>
+              {projectForTodo.name === "Inbox" ? (
+                <InboxIcon className="text-blue-500 h-4 w-4 mr-1" />
+              ) : null}
+              {projectForTodo.name ?? "Inbox"}
+            </div>
+          </ProjectsDropDown>
+        </div>
 
-              <PriorityDropDown>
-                <HoverCard.Root>
-                  <HoverCard.Trigger>
-                    <FlagIconOutline
-                      className={`w-7 h-7 ${
-                        flagColors[formik.values.priority]
-                      } hover:bg-gray-200
-                 hover:text-gray-500 p-1 rounded-sm`}
-                    />
-                  </HoverCard.Trigger>
-                  <HoverCard.Content
-                    sideOffset={8}
-                    className="bg-gray-800 text-white text-sm py-1 px-2
-                   rounded-sm shadow-sm"
-                  >
-                    Set priority P1 P2 P3 P4
-                  </HoverCard.Content>
-                </HoverCard.Root>
-              </PriorityDropDown>
-            </div>
-            <hr />
-            <div className="mt-5 flex items-center space-x-2">
-              {!formik.isSubmitting ? (
-                <button
-                  type="submit"
-                  disabled={!formik.isValid || !formik.dirty}
-                  className={`px-2 py-1 text-white bg-emerald-700 
-                  hover:bg-green-600 rounded-md text-xs font-semibold
-                  ${!formik.isValid || !formik.dirty ? "opacity-50" : ""}`}
-                >
-                  Add Todo
-                </button>
-              ) : (
-                <span>submitting</span>
-              )}
-              <Dialog.Close onClick={() => formik.resetForm()}>
-                <XIcon className="h-5 w-5 text-gray-500" />
-              </Dialog.Close>
-            </div>
-          </form>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        <PriorityDropDown>
+          <HoverCard.Root>
+            <HoverCard.Trigger>
+              <FlagIconOutline
+                className={`w-7 h-7 ${
+                  flagColors[formik.values.priority]
+                } hover:bg-gray-200
+       hover:text-gray-500 p-1 rounded-sm`}
+              />
+            </HoverCard.Trigger>
+            <HoverCard.Content
+              sideOffset={8}
+              className="bg-gray-800 text-white text-sm py-1 px-2
+         rounded-sm shadow-sm"
+            >
+              Set priority P1 P2 P3 P4
+            </HoverCard.Content>
+          </HoverCard.Root>
+        </PriorityDropDown>
+      </div>
+      <hr />
+      <div className="mt-2 flex items-center space-x-2">
+        {!formik.isSubmitting ? (
+          <button
+            type="submit"
+            disabled={!formik.isValid || !formik.dirty}
+            className={`px-2 py-1 text-white bg-emerald-700 
+        hover:bg-green-600 rounded-md text-xs font-semibold
+        ${!formik.isValid || !formik.dirty ? "opacity-50" : ""}`}
+          >
+            Add Todo
+          </button>
+        ) : (
+          <span>submitting</span>
+        )}
+        {isDialog ? (
+          <Dialog.Close onClick={() => formik.resetForm()}>
+            <XIcon className="h-5 w-5 text-gray-500" />
+          </Dialog.Close>
+        ) : (
+          <div
+            onClick={() => {
+              formik.resetForm();
+              setOpenForm((pv) => !pv);
+            }}
+            className="p-1 border-[1px] border-gray-500 rounded-md
+             flex justify-center items-center text-xs"
+          >
+            Cancel
+          </div>
+        )}
+      </div>
+    </form>
   );
+
+  if (isDialog)
+    return (
+      <Dialog.Root>
+        <Dialog.Trigger>{children}</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed  inset-0" />
+          <Dialog.Content
+            // Don't close the Alert Dialog when pressing ESC
+            onEscapeKeyDown={(event) => event.preventDefault()}
+            // Don't close the Alert Dialog when clicking outside
+            onPointerDownOutside={(event) => event.preventDefault()}
+            className="bg-white rounded-md shadow-2xl fixed p-4
+        top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm"
+          >
+            {FormTodo}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    );
+  else
+    return openForm ? (
+      <div className="p-1 border-[0.8px] border-gray-500 rounded-md ">
+        {FormTodo}
+      </div>
+    ) : (
+      <div onClick={() => setOpenForm((pv) => !pv)}>{children}</div>
+    );
 }
 
 export default AddTodo;
