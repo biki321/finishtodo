@@ -24,7 +24,9 @@ function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
   if (!projectLists) return <div>loading...</div>;
 
   return (
-    <>
+    <div className="h-screen">
+      {/* if height of navbar is changed from h-12 then in 
+      tailwind config file pageHeight should be updated */}
       <div className="bg-emerald-700 p-3 flex justify-between h-12">
         <div className="flex space-x-3">
           <div onClick={handleDrawer}>
@@ -33,7 +35,7 @@ function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
           <HomeIcon />
         </div>
         <div className="flex space-x-3">
-          <AddTodo isDialog={true} todo={undefined}>
+          <AddTodo isDialog={true} todo={undefined} curProjForTodo={undefined}>
             <PlusIcon />
           </AddTodo>
           <CheckCircleIcon />
@@ -54,11 +56,15 @@ function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
             projectLists={projectLists.data}
           />
         </div>
-        <div className={`${!drawerOpen ? "md:ml-[320px]" : "md:ml-0"}`}>
+        <div
+          className={`${
+            !drawerOpen ? "md:ml-[320px]" : "md:ml-0"
+          } flex-1 h-pageHeight overflow-y-auto`}
+        >
           {children}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

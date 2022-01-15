@@ -12,15 +12,16 @@ import * as HoverCard from "@radix-ui/react-hover-card";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Priority, Todo } from "@prisma/client";
+import { Priority, Project, Todo } from "@prisma/client";
 import AutoTextArea from "./AutoTextArea";
 import flagColors from "../helpers/flagColors";
+import { useSWRConfig } from "swr";
+import cuid from "cuid";
 
 interface FormValues {
   todo: string;
   description: string;
   priority: Priority;
-  dueDate: Date | null;
 }
 
 interface FormErrors {
@@ -47,11 +48,13 @@ const validate = (values: FormValues) => {
 function AddTodo({
   children,
   isDialog,
-  todo: Todo,
+  todo,
+  curProjForTodo,
 }: {
   children: JSX.Element;
   isDialog: boolean;
   todo: Todo | undefined;
+  curProjForTodo: Project | undefined;
 }) {
   const { user } = useUser();
   const router = useRouter();
@@ -64,6 +67,7 @@ function AddTodo({
     name: undefined,
   });
   const [openForm, setOpenForm] = useState(false);
+  const { mutate } = useSWRConfig();
   const asPath = router.asPath.split("/");
   // const day = days[new Date().getDay()];
   // const tomorrow = days[(new Date().getDay() + 1) % 7];
@@ -71,32 +75,105 @@ function AddTodo({
   if (asPath[1] === "today") {
     initialDueDate = new Date();
   }
+  if (todo && todo.dueDate) {
+    initialDueDate = new Date(todo.dueDate);
+  }
   const [dueDate, setDueDate] = useState<Date | null>(initialDueDate);
   // console.log("router pathname", router.asPath.split("/"));
 
-  const formik = useFormik<FormValues>({
-    initialValues: {
-      todo: "",
-      description: "",
-      dueDate: dueDate,
-      priority: Priority.P4,
-    },
-    validate,
-    onSubmit: async (values) => {
-      // ("is submitting before", formik.isSubmitting);
-      const response = await fetch(`/api/projects/${projectForTodo.id}/todos`, {
-        method: "POST",
+  const create = async (values: FormValues) => {
+    const newTodo = {
+      id: cuid(),
+      todo: values.todo,
+      description: values.description,
+      dueDate: dueDate ? dueDate.toISOString() : null,
+      projectId: projectForTodo.id,
+      priority: values.priority,
+    };
+    formik.resetForm();
+    mutate(
+      `/api/projects/${projectForTodo.id}/todos`,
+      (data: { data: Todo[] }) => {
+        return { data: [...data.data, newTodo] };
+      },
+      false
+    );
+
+    const response = await fetch(`/api/projects/${projectForTodo.id}/todos`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newTodo),
+    });
+
+    if (!response.ok) {
+      mutate(
+        `/api/projects/${projectForTodo.id}/todos`,
+        (data: { data: Todo[] }) => {
+          return data.data.filter((todo) => todo.id !== newTodo.id);
+        },
+        false
+      );
+    }
+    mutate(`/api/projects/${projectForTodo.id}/todos`);
+  };
+  const update = async (values: FormValues) => {
+    const updatedTodo = {
+      id: todo!.id,
+      todo: values.todo,
+      description: values.description,
+      dueDate: dueDate ? dueDate.toISOString() : null,
+      projectId: projectForTodo.id,
+      priority: values.priority,
+    };
+    // formik.resetForm();
+    mutate(
+      `/api/projects/${projectForTodo.id}/todos`,
+      (data: { data: Todo[] }) => {
+        const todos = data.data.filter((ele) => ele.id !== todo!.id);
+        return { data: [...todos, updatedTodo] };
+      },
+      false
+    );
+
+    const response = await fetch(
+      `/api/projects/${projectForTodo.id}/todos/${todo!.id}`,
+      {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          todo: formik.values.todo,
-          description: formik.values.description,
-          dueDate: dueDate ? dueDate.toISOString() : null,
-          projectId: projectForTodo.id,
-          priority: formik.values.priority,
-        }),
-      });
+        body: JSON.stringify(updatedTodo),
+      }
+    );
+
+    if (!response.ok) {
+      mutate(
+        `/api/projects/${projectForTodo.id}/todos`,
+        (data: { data: Todo[] }) => {
+          const todos = data.data.filter((ele) => ele.id !== todo!.id);
+          return [...todos, todo];
+        },
+        false
+      );
+    }
+    mutate(`/api/projects/${projectForTodo.id}/todos`);
+  };
+  const formik = useFormik<FormValues>({
+    initialValues: {
+      todo: todo ? todo.todo : "",
+      description: todo && todo.description ? todo.description : "",
+      priority: todo ? todo.priority : Priority.P4,
+    },
+    validate,
+    onSubmit: async (values) => {
+      if (!isDialog) setOpenForm(false);
+      if (todo) {
+        update(values);
+      } else {
+        create(values);
+      }
     },
   });
   useEffect(() => {
@@ -116,12 +193,17 @@ function AddTodo({
       defaultProject.name = project?.name;
     }
 
+    if (curProjForTodo) {
+      defaultProject.id = curProjForTodo.id;
+      defaultProject.name = curProjForTodo.name;
+    }
+    console.log("useefcect addto");
     // console.log("default project", defaultProject);
     setProjectForTodo(() => ({
       id: defaultProject.id,
       name: defaultProject.name,
     }));
-  }, [projectLists?.data, router.asPath]);
+  }, [curProjForTodo, projectLists?.data, router.asPath]);
 
   const CustomDatePicker = () => {
     // console.log("duedate", dueDate?.toISOString());
@@ -305,15 +387,29 @@ function AddTodo({
       <hr />
       <div className="mt-2 flex items-center space-x-2">
         {!formik.isSubmitting ? (
-          <button
-            type="submit"
-            disabled={!formik.isValid || !formik.dirty}
-            className={`px-2 py-1 text-white bg-emerald-700 
+          isDialog ? (
+            <Dialog.Close
+              type="submit"
+              disabled={!formik.isValid || !formik.dirty}
+              className={`px-2 py-1 text-white bg-emerald-700 
         hover:bg-green-600 rounded-md text-xs font-semibold
         ${!formik.isValid || !formik.dirty ? "opacity-50" : ""}`}
-          >
-            Add Todo
-          </button>
+              onClick={() => formik.submitForm()}
+            >
+              Save
+            </Dialog.Close>
+          ) : (
+            <button
+              type="submit"
+              disabled={!formik.isValid || !formik.dirty}
+              className={`px-2 py-1 text-white bg-emerald-700 
+                    hover:bg-green-600 rounded-md text-xs font-semibold
+                    ${!formik.isValid || !formik.dirty ? "opacity-50" : ""}`}
+              onClick={() => formik.submitForm()}
+            >
+              Save
+            </button>
+          )
         ) : (
           <span>submitting</span>
         )}
@@ -325,10 +421,10 @@ function AddTodo({
           <div
             onClick={() => {
               formik.resetForm();
-              setOpenForm((pv) => !pv);
+              setOpenForm(false);
             }}
             className="p-1 border-[1px] border-gray-500 rounded-md
-             flex justify-center items-center text-xs"
+             flex justify-center items-center text-xs cursor-pointer"
           >
             Cancel
           </div>
@@ -362,7 +458,7 @@ function AddTodo({
         {FormTodo}
       </div>
     ) : (
-      <div onClick={() => setOpenForm((pv) => !pv)}>{children}</div>
+      <div onClick={() => setOpenForm(true)}>{children}</div>
     );
 }
 

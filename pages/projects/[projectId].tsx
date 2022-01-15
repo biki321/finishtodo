@@ -8,6 +8,7 @@ import useTodos from "../../hooks/useTodos";
 import NextPageWithLayout from "../../types/NextPageWithLayout ";
 import { PlusIcon } from "@heroicons/react/outline";
 import AddTodo from "../../components/AddTodo";
+import TodoDialog from "../../components/TodoDialog";
 
 const Project: NextPageWithLayout = () => {
   const { user, isLoading: userLoading } = useUser();
@@ -40,13 +41,23 @@ const Project: NextPageWithLayout = () => {
   if (!currentProject) return <div>no project exist with this id</div>;
 
   return (
-    <div className="p-1 ml-2 mt-2 space-y-2">
+    <div className="p-1 mx-2 my-2 space-y-3">
       <h1 className="font-bold">{currentProject.name}</h1>
-      {todos?.data.map((todo) => (
-        <Todo key={todo.id} todo={todo} />
-      ))}
-      <AddTodo isDialog={false} todo={undefined}>
-        <div className="text-xs text-gray-500 flex cursor-pointer">
+      <div className="flex flex-col space-y-3">
+        {todos?.data.map((todo) => (
+          <div key={todo.id}>
+            <TodoDialog todo={todo} key={todo.id} project={currentProject}>
+              <Todo todo={todo} key={todo.id} />
+            </TodoDialog>
+          </div>
+        ))}
+      </div>
+      <AddTodo
+        isDialog={false}
+        todo={undefined}
+        curProjForTodo={currentProject}
+      >
+        <div className="text-xs text-gray-500 flex cursor-pointer w-28">
           <PlusIcon className="w-4 h-4 text-emerald-700 mr-2" />
           Add task
         </div>
