@@ -3,7 +3,6 @@ import * as Switch from "@radix-ui/react-switch";
 import { XIcon } from "@heroicons/react/outline";
 import { useFormik } from "formik";
 import { useUser } from "@auth0/nextjs-auth0";
-import { useState } from "react";
 
 interface FormValues {
   projectName: string;
@@ -123,7 +122,7 @@ function CreateProject({ children }: { children: JSX.Element }) {
                   type="submit"
                   disabled={!formik.isValid || !formik.dirty}
                   className={`px-2 py-1 text-white bg-emerald-700 
-                hover:bg-green-600 rounded-md 
+                hover:bg-green-600 rounded-md text-xs font-semibold 
                 ${!formik.isValid || !formik.dirty ? "opacity-50" : ""}`}
                 >
                   Create

@@ -20,7 +20,7 @@ export default withApiAuthRequired(async function handler(req, res) {
     try {
       const todo = await prisma.todo.create({
         data: {
-          name: req.body.name,
+          todo: req.body.todo,
           description: req.body.description ?? null,
           dueDate: req.body.dueDate ?? null,
           projectId: projectId,

@@ -1,6 +1,8 @@
 import { Project } from "@prisma/client";
 import { useState } from "react";
 import useSWR from "swr";
+import useProjectLists from "../hooks/useProjectLists";
+import AddTodo from "./AddTodo";
 import AvatarDropDown from "./AvatarDropDown";
 import Drawer from "./Drawer";
 import {
@@ -11,36 +13,11 @@ import {
   PlusIcon,
 } from "./Icons";
 
-type JSONResponse = {
-  data?: Project[];
-  error?: string;
-};
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-
-  // If the status code is not in the range 200-299,
-  // we still try to parse and throw it.
-  if (!res.ok) {
-    console.log("res not ok");
-    const errorObj = new Error() as Error & { status: number };
-    const error = await res.json();
-    errorObj.message = error.error;
-    errorObj.status = error.status;
-    throw errorObj;
-  }
-  return res.json();
-};
-
 function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
   //user will exist because this page won't render without an authenticated user
   const [drawerOpen, setDrawerOpen] = useState(false);
   const handleDrawer = () => setDrawerOpen((prevState) => !prevState);
-  const { data: projectLists, error } = useSWR<
-    { data: Project[] },
-    Error & { status: number }
-  >("/api/projects", fetcher);
-
+  const { error, projectLists } = useProjectLists();
   if (error) {
     console.log(error);
     return <div>failed to load</div>;
@@ -57,7 +34,9 @@ function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
           <HomeIcon />
         </div>
         <div className="flex space-x-3">
-          <PlusIcon />
+          <AddTodo>
+            <PlusIcon />
+          </AddTodo>
           <CheckCircleIcon />
           <AvatarDropDown />
         </div>

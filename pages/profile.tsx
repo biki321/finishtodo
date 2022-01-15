@@ -1,11 +1,10 @@
-import { useUser, UserProfile } from "@auth0/nextjs-auth0";
+import { useUser } from "@auth0/nextjs-auth0";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { NextPage } from "next/types";
 import { ReactElement, ReactNode, useEffect } from "react";
-import Layout from "../../components/Layout";
-import { placeholderPersonImg } from "../../placeholderImgs";
-import NextPageWithLayout from "../../types/NextPageWithLayout ";
+import Layout from "../components/Layout";
+import { placeholderPersonImg } from "../placeholderImgs";
+import NextPageWithLayout from "../types/NextPageWithLayout ";
 
 const Profile: NextPageWithLayout = () => {
   const { user, error, isLoading } = useUser();

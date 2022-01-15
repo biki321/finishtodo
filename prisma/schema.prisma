@@ -29,7 +29,7 @@ model User {
 
 model Todo {
   id           String    @id @default(cuid())
-  name         String    @db.VarChar(120)
+  todo         String    @db.VarChar(500)
   description  String?   @db.VarChar(1000)
   noOfComments Int       @default(0) @map("no_of_comments")
   comments     Comment[]

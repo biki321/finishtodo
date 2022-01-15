@@ -4,16 +4,14 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 const Avatar = ({ size }: { size: number }) => {
   const { user } = useUser();
   if (!user) return null;
+
   return (
-    <AvatarPrimitive.Root
-      className={`flex justify-center items-center w-${size} h-${size}
-    cursor-pointer rounded-full`}
-    >
+    <AvatarPrimitive.Root className={`rounded-full`}>
       {user && (
         <AvatarPrimitive.Image
           src={user.picture!}
           alt={user.nickname!}
-          className="w-full h-full object-cover rounded-full"
+          className={`w-${size.toString()} h-${size.toString()} object-cover rounded-full`}
         />
       )}
       <AvatarPrimitive.Fallback

@@ -23,21 +23,26 @@ const LinkComp = ({
   children: JSX.Element;
   href?: string;
   name: string;
-}) => (
-  <div
-    className="flex space-x-1 items-center cursor-pointer 
-  hover:bg-gray-300 focus:bg-gray-300 rounded-md p-2"
-  >
-    {children}
-    {href ? (
-      <Link href={href}>
-        <a className="text-sm">{name}</a>
-      </Link>
-    ) : (
-      <span>{name}</span>
-    )}
-  </div>
-);
+}) =>
+  href ? (
+    <Link href={href}>
+      <a
+        className="flex space-x-1 items-center cursor-pointer 
+  hover:bg-gray-300 focus:bg-gray-300 rounded-md p-2 w-full"
+      >
+        {children}
+        <span className="text-sm">{name}</span>
+      </a>
+    </Link>
+  ) : (
+    <div
+      className="flex space-x-1 items-center 
+ hover:bg-gray-300 focus:bg-gray-300 rounded-md p-2 w-full"
+    >
+      {children}
+      <span className="text-sm">{name}</span>
+    </div>
+  );
 
 function Drawer({ handleDrawer, projectLists }: IProp) {
   const [accordianValue, setAccordianValue] = useState("");

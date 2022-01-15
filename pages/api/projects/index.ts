@@ -28,6 +28,7 @@ export default withApiAuthRequired(async function handler(
       });
       res.status(200).json({ data: projects });
     } catch (error) {
+      console.log("error at /api/projects get", error);
       res.status(500).json({ status: 500, error: "server problem" });
     }
   } else if (req.method === "POST") {

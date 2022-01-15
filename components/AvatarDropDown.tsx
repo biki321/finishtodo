@@ -13,13 +13,13 @@ export default function AvatarDropDown() {
       </DropdownMenu.Trigger>
 
       <DropdownMenu.Content
-        sideOffset={0}
+        sideOffset={1}
         className="max-w-[262] rounded-md shadow-md p-3 bg-white
         space-y-2"
       >
         <DropdownMenu.Item className="cursor-pointer">
           <div className="flex">
-            <Avatar size={9} />
+            <Avatar size={1} />
             <div className="ml-3">
               <p className="text-[12.96px] font-bold">
                 {user.nickname?.toUpperCase()}
