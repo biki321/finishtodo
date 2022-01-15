@@ -131,8 +131,12 @@ function AddTodo({
     mutate(
       `/api/projects/${projectForTodo.id}/todos`,
       (data: { data: Todo[] }) => {
-        const todos = data.data.filter((ele) => ele.id !== todo!.id);
-        return { data: [...todos, updatedTodo] };
+        const todos = data.data.map((ele) => {
+          if (ele.id === updatedTodo.id) return updatedTodo;
+          else return ele;
+        });
+        // const todos = data.data.filter((ele) => ele.id !== todo!.id);
+        return { data: [...todos] };
       },
       false
     );
@@ -152,8 +156,12 @@ function AddTodo({
       mutate(
         `/api/projects/${projectForTodo.id}/todos`,
         (data: { data: Todo[] }) => {
-          const todos = data.data.filter((ele) => ele.id !== todo!.id);
-          return [...todos, todo];
+          const todos = data.data.map((ele) => {
+            if (ele.id === updatedTodo.id) return todo;
+            else return ele;
+          });
+          // const todos = data.data.filter((ele) => ele.id !== todo!.id);
+          return { data: [...todos] };
         },
         false
       );

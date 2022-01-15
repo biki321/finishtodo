@@ -1,14 +1,18 @@
 import { useUser } from "@auth0/nextjs-auth0";
 import { useRouter } from "next/router";
-import { ReactElement } from "react";
+import { Fragment, ReactElement } from "react";
 import Layout from "../../components/Layout";
 import Todo from "../../components/Todo";
 import useProjectLists from "../../hooks/useProjectLists";
 import useTodos from "../../hooks/useTodos";
 import NextPageWithLayout from "../../types/NextPageWithLayout ";
-import { PlusIcon } from "@heroicons/react/outline";
+import { CheckIcon, PlusIcon, TrashIcon } from "@heroicons/react/outline";
 import AddTodo from "../../components/AddTodo";
 import TodoDialog from "../../components/TodoDialog";
+import { useSWRConfig } from "swr";
+import { Project } from "@prisma/client";
+import todoDone from "../../helpers/todoDone";
+import todoDelete from "../../helpers/todoDelete";
 
 const Project: NextPageWithLayout = () => {
   const { user, isLoading: userLoading } = useUser();
@@ -25,6 +29,7 @@ const Project: NextPageWithLayout = () => {
     isLoading: todosLoading,
     error: todosError,
   } = useTodos(projectId!);
+  const { mutate } = useSWRConfig();
 
   if (userLoading || projectListsLoading || todosLoading)
     return <div>loading</div>;
@@ -42,14 +47,31 @@ const Project: NextPageWithLayout = () => {
 
   return (
     <div className="p-1 mx-2 my-2 space-y-3">
-      <h1 className="font-bold">{currentProject.name}</h1>
-      <div className="flex flex-col space-y-3">
-        {todos?.data.map((todo) => (
-          <div key={todo.id}>
-            <TodoDialog todo={todo} key={todo.id} project={currentProject}>
-              <Todo todo={todo} key={todo.id} />
-            </TodoDialog>
-          </div>
+      <h1 className="font-bold text-lg">{currentProject.name}</h1>
+      <div className="flex flex-col space-y-1">
+        {todos!.data.map((todo) => (
+          <Fragment key={todo.id}>
+            <div className="flex">
+              <div
+                className="w-4 h-4 rounded-full border-[1px] border-gray-700
+         mr-2 mt-1 cursor-pointer hover:bg-gray-200 flex justify-center items-center"
+                onClick={() => todoDone(currentProject, todo, mutate)}
+              >
+                <CheckIcon className="w-4 h-4 text-gray-800 opacity-0 hover:opacity-100" />
+              </div>
+              <TodoDialog todo={todo} key={todo.id} project={currentProject}>
+                <Todo todo={todo} key={todo.id} />
+              </TodoDialog>
+              <div
+                className="p-[2px] flex justify-center items-center ml-auto 
+              w-6 h-6 hover:bg-gray-100 self-center"
+                onClick={() => todoDelete(currentProject, todo, mutate)}
+              >
+                <TrashIcon className="w-5 h-5 text-gray-400" />
+              </div>
+            </div>
+            <hr className="bg-gray-200 h-[0.8px]" />
+          </Fragment>
         ))}
       </div>
       <AddTodo

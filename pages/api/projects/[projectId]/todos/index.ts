@@ -10,7 +10,7 @@ export default withApiAuthRequired(async function handler(req, res) {
   if (req.method === "GET") {
     try {
       const todos = await prisma.todo.findMany({
-        where: { projectId: projectId },
+        where: { projectId: projectId, isCompleted: false },
       });
       res.status(200).json({ data: todos });
     } catch (error) {
