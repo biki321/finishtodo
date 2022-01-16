@@ -1,6 +1,6 @@
 // /api/projects/:projectId/todos/:todoId
 
-import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0";
+import { withApiAuthRequired } from "@auth0/nextjs-auth0";
 import { Prisma } from "@prisma/client";
 import { NextApiResponse } from "next";
 import { prisma } from "../../../../../../lib/prisma";
@@ -19,6 +19,8 @@ export default withApiAuthRequired(async function handler(req, res) {
   todoId = typeof todoId === "object" ? todoId[0] : todoId;
 
   try {
+    console.log("todo update", projectId, todoId, req.body);
+
     if (req.method === "PATCH") {
       const todo = await prisma.todo.update({
         data: { ...req.body },
@@ -34,6 +36,7 @@ export default withApiAuthRequired(async function handler(req, res) {
       res.status(203).end();
     }
   } catch (error) {
+    console.log("error at :todoId", error);
     handleError(error, res);
   }
 });

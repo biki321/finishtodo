@@ -15,7 +15,7 @@ export default function AvatarDropDown() {
       <DropdownMenu.Content
         sideOffset={1}
         className="max-w-[262] rounded-md shadow-md p-3 bg-white
-        space-y-2"
+        space-y-2 outline-none"
       >
         <DropdownMenu.Item className="cursor-pointer">
           <div className="flex">

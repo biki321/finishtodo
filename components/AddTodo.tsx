@@ -17,6 +17,7 @@ import AutoTextArea from "./AutoTextArea";
 import flagColors from "../helpers/flagColors";
 import { useSWRConfig } from "swr";
 import cuid from "cuid";
+import urlForTodosOfToday from "../helpers/urlForTodosOfToday";
 
 interface FormValues {
   todo: string;
@@ -28,8 +29,6 @@ interface FormErrors {
   todo: string | undefined;
   description: string | undefined;
 }
-
-// const days = ["Sun", "Mon", "Tues", "Wed", "Thus", "Fri", "Sat"];
 
 const validate = (values: FormValues) => {
   const errors: FormErrors = { todo: undefined, description: undefined };
@@ -89,12 +88,26 @@ function AddTodo({
       dueDate: dueDate ? dueDate.toISOString() : null,
       projectId: projectForTodo.id,
       priority: values.priority,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     formik.resetForm();
     mutate(
       `/api/projects/${projectForTodo.id}/todos`,
       (data: { data: Todo[] }) => {
+        if (!data) return data;
         return { data: [...data.data, newTodo] };
+      },
+      false
+    );
+    mutate(
+      urlForTodosOfToday(),
+      (data: { data: Todo[] }) => {
+        if (!data) {
+          return { data: [newTodo] };
+        } else {
+          return { data: [...data.data, newTodo] };
+        }
       },
       false
     );
@@ -111,7 +124,16 @@ function AddTodo({
       mutate(
         `/api/projects/${projectForTodo.id}/todos`,
         (data: { data: Todo[] }) => {
-          return data.data.filter((todo) => todo.id !== newTodo.id);
+          if (!data) return data;
+          return { data: data.data.filter((todo) => todo.id !== newTodo.id) };
+        },
+        false
+      );
+      mutate(
+        urlForTodosOfToday(),
+        (data: { data: Todo[] }) => {
+          if (!data) return data;
+          return { data: data.data.filter((todo) => todo.id !== newTodo.id) };
         },
         false
       );
@@ -126,11 +148,27 @@ function AddTodo({
       dueDate: dueDate ? dueDate.toISOString() : null,
       projectId: projectForTodo.id,
       priority: values.priority,
+      createdAt: todo!.createdAt,
+      updatedAt: new Date().toISOString(),
     };
     // formik.resetForm();
     mutate(
       `/api/projects/${projectForTodo.id}/todos`,
       (data: { data: Todo[] }) => {
+        if (!data) return data;
+        const todos = data.data.map((ele) => {
+          if (ele.id === updatedTodo.id) return updatedTodo;
+          else return ele;
+        });
+        // const todos = data.data.filter((ele) => ele.id !== todo!.id);
+        return { data: [...todos] };
+      },
+      false
+    );
+    mutate(
+      urlForTodosOfToday(),
+      (data: { data: Todo[] }) => {
+        if (!data) return data;
         const todos = data.data.map((ele) => {
           if (ele.id === updatedTodo.id) return updatedTodo;
           else return ele;
@@ -156,6 +194,20 @@ function AddTodo({
       mutate(
         `/api/projects/${projectForTodo.id}/todos`,
         (data: { data: Todo[] }) => {
+          if (!data) return data;
+          const todos = data.data.map((ele) => {
+            if (ele.id === updatedTodo.id) return todo;
+            else return ele;
+          });
+          // const todos = data.data.filter((ele) => ele.id !== todo!.id);
+          return { data: [...todos] };
+        },
+        false
+      );
+      mutate(
+        urlForTodosOfToday(),
+        (data: { data: Todo[] }) => {
+          if (!data) return data;
           const todos = data.data.map((ele) => {
             if (ele.id === updatedTodo.id) return todo;
             else return ele;

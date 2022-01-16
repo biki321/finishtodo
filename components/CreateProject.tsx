@@ -3,6 +3,9 @@ import * as Switch from "@radix-ui/react-switch";
 import { XIcon } from "@heroicons/react/outline";
 import { useFormik } from "formik";
 import { useUser } from "@auth0/nextjs-auth0";
+import { useSWRConfig } from "swr";
+import cuid from "cuid";
+import { Project } from "@prisma/client";
 
 interface FormValues {
   projectName: string;
@@ -28,6 +31,7 @@ const validate = (values: FormValues) => {
 // server side errors upon submission have not been handled yet
 function CreateProject({ children }: { children: JSX.Element }) {
   const { user } = useUser();
+  const { mutate } = useSWRConfig();
   const formik = useFormik<FormValues>({
     initialValues: {
       projectName: "",
@@ -35,22 +39,36 @@ function CreateProject({ children }: { children: JSX.Element }) {
     },
     validate,
     onSubmit: async (values) => {
-      console.log("is submitting before", formik.isSubmitting);
+      const newProject = {
+        id: cuid(),
+        name: values.projectName,
+        isFav: values.isFav,
+        userId: user!.sub!,
+        isIndex: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      mutate("/api/projects", (data: { data: Project[] }) => {
+        return { data: [...data.data] };
+      });
+      formik.resetForm();
       const response = await fetch("/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: values.projectName,
-          isFav: values.isFav,
-          userId: user!.sub!,
-          isIndex: false,
-        }),
+        body: JSON.stringify(newProject),
       });
-      //   if(!response.ok){
-      //       formik.sta
-      //   }
+      if (!response.ok) {
+        mutate(
+          `/api/projects`,
+          (data: { data: Project[] }) => {
+            return data.data.filter((ele) => ele.id !== newProject.id);
+          },
+          false
+        );
+      }
+      mutate("/api/projects");
     },
   });
 
@@ -118,15 +136,16 @@ function CreateProject({ children }: { children: JSX.Element }) {
                 <XIcon className="h-5 w-5 text-gray-500" />
               </Dialog.Close>
               {!formik.isSubmitting ? (
-                <button
+                <Dialog.Close
                   type="submit"
                   disabled={!formik.isValid || !formik.dirty}
                   className={`px-2 py-1 text-white bg-emerald-700 
                 hover:bg-green-600 rounded-md text-xs font-semibold 
                 ${!formik.isValid || !formik.dirty ? "opacity-50" : ""}`}
+                  onClick={formik.submitForm}
                 >
                   Create
-                </button>
+                </Dialog.Close>
               ) : (
                 <span>submitting</span>
               )}

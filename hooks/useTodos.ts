@@ -18,10 +18,11 @@ const fetcher = async (url: string) => {
 };
 
 function useTodos(projectId: string) {
+  let url = `/api/projects/${projectId}/todos`;
   const { data: todos, error } = useSWR<
     { data: Todo[] },
     Error & { status: number }
-  >(`/api/projects/${projectId}/todos`, fetcher);
+  >(url, fetcher);
   return { todos, error, isLoading: !error && !todos };
 }
 

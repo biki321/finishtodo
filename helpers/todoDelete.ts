@@ -11,6 +11,7 @@ const todoDelete = async (
   mutate(
     `/api/projects/${project.id}/todos`,
     (data: { data: Todo[] }) => {
+      if (!data) return data;
       return { data: data.data.filter((ele) => ele.id !== todo.id) };
     },
     false
@@ -27,6 +28,7 @@ const todoDelete = async (
     mutate(
       `/api/projects/${project.id}/todos`,
       (data: { data: Todo[] }) => {
+        if (!data) return data;
         return { data: [...data.data, todo] };
       },
       false

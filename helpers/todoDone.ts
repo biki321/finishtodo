@@ -5,12 +5,13 @@ const todoDone = async (
   todo: Todo,
   mutate: ScopedMutator<any>
 ) => {
-  const updatedTodo = {
+  const dataToUpdate = {
     isCompleted: true,
   };
   mutate(
     `/api/projects/${project.id}/todos`,
     (data: { data: Todo[] }) => {
+      if (!data) return data;
       return { data: data.data.filter((ele) => ele.id !== todo.id) };
     },
     false
@@ -23,14 +24,16 @@ const todoDone = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(updatedTodo),
+      body: JSON.stringify(dataToUpdate),
     }
   );
 
   if (!response.ok) {
+    console.log("resose not ok at todoDone", response.body);
     mutate(
       `/api/projects/${project.id}/todos`,
       (data: { data: Todo[] }) => {
+        if (!data) return data;
         return { data: [...data.data, todo] };
       },
       false
