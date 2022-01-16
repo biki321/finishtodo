@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useState } from "react";
 import useProjectLists from "../hooks/useProjectLists";
 import AddTodo from "./AddTodo";
@@ -32,7 +33,11 @@ function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
           <div onClick={handleDrawer}>
             {drawerOpen ? <CancelIcon /> : <MenuIcon />}
           </div>
-          <HomeIcon />
+          <Link href="/today">
+            <a>
+              <HomeIcon />
+            </a>
+          </Link>
         </div>
         <div className="flex space-x-3">
           <AddTodo isDialog={true} todo={undefined} curProjForTodo={undefined}>

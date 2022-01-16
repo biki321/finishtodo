@@ -9,6 +9,7 @@ import CalendarIconSolid, { DateIconOuline, InboxIcon } from "./Icons";
 import { useState } from "react";
 import CreateProject from "./CreateProject";
 import { Project } from "@prisma/client";
+import { useRouter } from "next/router";
 
 interface IProp {
   handleDrawer: () => void;
@@ -16,6 +17,9 @@ interface IProp {
 }
 
 function Drawer({ handleDrawer, projectLists }: IProp) {
+  const router = useRouter();
+  const asPath = router.asPath.split("/");
+  console.log(asPath);
   const [accordianValue, setAccordianValue] = useState("");
   const getTriggerClass = (triggerValue: string) => {
     return triggerValue === accordianValue ? "rotate-90" : "rotate-0";
@@ -26,16 +30,20 @@ function Drawer({ handleDrawer, projectLists }: IProp) {
     children,
     href,
     name,
+    focused,
   }: {
     children: JSX.Element;
     href?: string;
     name: string;
+    focused: boolean;
   }) =>
     href ? (
       <Link href={href}>
         <a
-          className="flex space-x-1 items-center cursor-pointer 
-    hover:bg-gray-300 focus:bg-gray-300 rounded-md p-2 w-full"
+          className={`flex space-x-1 items-center cursor-pointer 
+          ${
+            focused ? "bg-gray-200" : ""
+          } hover:bg-gray-300 rounded-md p-2 w-full`}
           // onClick={handleDrawer}
         >
           {children}
@@ -61,13 +69,14 @@ function Drawer({ handleDrawer, projectLists }: IProp) {
         <LinkComp
           href={indexProjectId ? "/projects/" + indexProjectId : undefined}
           name="Inbox"
+          focused={asPath[1] === "projects" && asPath[2] === indexProjectId}
         >
           <InboxIcon />
         </LinkComp>
-        <LinkComp name="Today" href="/today">
+        <LinkComp name="Today" href="/today" focused={asPath[1] === "today"}>
           <DateIconOuline />
         </LinkComp>
-        <LinkComp name="Upcoming">
+        <LinkComp name="Upcoming" focused={false}>
           <CalendarIconSolid />
         </LinkComp>
         <br />
@@ -90,7 +99,7 @@ function Drawer({ handleDrawer, projectLists }: IProp) {
                 </div>
               </Accordion.Trigger>
               <CreateProject>
-                <PlusIcon className="h-4 w-4 ml-1 text-gray-500 bg-gray-300 rounded-sm" />
+                <PlusIcon className="h-4 w-4 ml-1 text-gray-500  rounded-sm" />
               </CreateProject>
             </Accordion.Header>
             <Accordion.Content className="text-sm text-gray-700 pl-3 pt-2 space-y-2">
@@ -98,12 +107,15 @@ function Drawer({ handleDrawer, projectLists }: IProp) {
                 !project.isIndex ? (
                   <div
                     key={project.id}
-                    className="flex justify-between items-center "
+                    className={`p-1 rounded-sm ${
+                      asPath[1] === "projects" && asPath[2] === project.id
+                        ? "bg-gray-200"
+                        : ""
+                    }`}
                   >
                     <Link href={`/projects/${project.id}`}>
                       <a className="truncate">{project.name}</a>
                     </Link>
-                    <DotsHorizontalIcon className="h-4 w-5 ml-1 text-gray-500 hidden" />
                   </div>
                 ) : null
               )}

@@ -17,7 +17,7 @@ export default function AvatarDropDown() {
         className="max-w-[262] rounded-md shadow-md p-3 bg-white
         space-y-2 outline-none"
       >
-        <DropdownMenu.Item className="cursor-pointer">
+        <DropdownMenu.Item className="">
           <div className="flex">
             <Avatar size={1} />
             <div className="ml-3">
