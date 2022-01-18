@@ -13,7 +13,7 @@ generator client {
 //https://www.prisma.io/docs/concepts/components/preview-features
 datasource db {
   provider             = "mysql"
-  url                  = env("DATABASE_URL")
+  url                  = env("PLANETSCALE_PRISMA_DATABASE_URL")
   shadowDatabaseUrl    = env("SHADOW_DATABASE_URL")
   referentialIntegrity = "prisma"
 }
