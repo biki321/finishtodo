@@ -1,10 +1,6 @@
 import * as Accordion from "@radix-ui/react-accordion";
 import Link from "next/link";
-import {
-  ChevronRightIcon,
-  DotsHorizontalIcon,
-  PlusIcon,
-} from "@heroicons/react/outline";
+import { ChevronRightIcon, PlusIcon } from "@heroicons/react/outline";
 import CalendarIconSolid, { DateIconOuline, InboxIcon } from "./Icons";
 import { useState } from "react";
 import CreateProject from "./CreateProject";

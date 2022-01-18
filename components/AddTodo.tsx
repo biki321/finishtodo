@@ -35,10 +35,10 @@ const validate = (values: FormValues) => {
 
   if (!values.todo) {
     errors.todo = "Required";
-  } else if (values.todo.length > 15) {
-    errors.todo = "Must be 15 characters or less";
-  } else if (values.description.length > 15) {
-    errors.todo = "Must be 15 characters or less";
+  } else if (values.todo.length > 500) {
+    errors.todo = "Must be 500 characters or less";
+  } else if (values.description.length > 1000) {
+    errors.todo = "Must be 1000 characters or less";
   } else return undefined;
   return errors;
 };

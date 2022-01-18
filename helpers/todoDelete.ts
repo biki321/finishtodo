@@ -5,9 +5,6 @@ const todoDelete = async (
   todo: Todo,
   mutate: ScopedMutator<any>
 ) => {
-  const updatedTodo = {
-    isCompleted: true,
-  };
   mutate(
     `/api/projects/${project.id}/todos`,
     (data: { data: Todo[] }) => {

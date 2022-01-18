@@ -19,6 +19,8 @@ import TodoDialog from "../components/TodoDialog";
 import AddTodo from "../components/AddTodo";
 import todoDone from "../helpers/todoDone";
 import todoDelete from "../helpers/todoDelete";
+import LoadingSpinner from "../components/LoadingSpinner";
+import Error from "../components/Error";
 
 const days = ["Sun", "Mon", "Tues", "Wed", "Thus", "Fri", "Sat"];
 const months = [
@@ -59,12 +61,13 @@ const Today: NextPageWithLayout = () => {
   const { mutate } = useSWRConfig();
 
   if (userLoading || projectListsLoading || todosLoading)
-    return <div>loading</div>;
+    return <LoadingSpinner />;
   if (!user) {
     router.replace("/");
     return <div></div>;
   }
-  if (projectListsError || todosError) return <div>error while loading</div>;
+  if (projectListsError || todosError)
+    return <Error msg="Error while loading" emoji="😥" />;
   const date = new Date();
   console.log("todo at today", todos);
   return (

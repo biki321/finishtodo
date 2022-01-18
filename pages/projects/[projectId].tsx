@@ -20,6 +20,8 @@ import todoDone from "../../helpers/todoDone";
 import todoDelete from "../../helpers/todoDelete";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import projectDelete from "../../helpers/projectDelete";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import Error from "../../components/Error";
 
 const Project: NextPageWithLayout = () => {
   const { user, isLoading: userLoading } = useUser();
@@ -39,12 +41,13 @@ const Project: NextPageWithLayout = () => {
   const { mutate } = useSWRConfig();
 
   if (userLoading || projectListsLoading || todosLoading)
-    return <div>loading</div>;
+    return <LoadingSpinner />;
   if (!user) {
     router.replace("/");
     return <div></div>;
   }
-  if (projectListsError || todosError) return <div>error while loading</div>;
+  if (projectListsError || todosError)
+    return <Error msg="Error while loading" emoji="😥" />;
 
   const currentProject = projectLists?.data.find(
     (project) => project.id === projectId
@@ -52,7 +55,8 @@ const Project: NextPageWithLayout = () => {
 
   const indexProject = projectLists?.data.find((project) => project.isIndex);
 
-  if (!currentProject) return <div>no project exist with this id</div>;
+  if (!currentProject)
+    return <Error msg="No projext exist with that id" emoji="😬" />;
 
   return (
     <div className="p-1 mx-2 my-2 space-y-3 max-w-5xl">

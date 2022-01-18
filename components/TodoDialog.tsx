@@ -2,7 +2,6 @@ import { Project, Todo } from "@prisma/client";
 import * as Dialog from "@radix-ui/react-dialog";
 import AddTodo from "./AddTodo";
 import { XIcon } from "@heroicons/react/outline";
-import todoDone from "../helpers/todoDone";
 import { useSWRConfig } from "swr";
 
 export default function TodoDialog({
